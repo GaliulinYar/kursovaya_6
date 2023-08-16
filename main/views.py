@@ -8,7 +8,21 @@ class ClientListView(ListView):
     model = Client
     template_name = 'main/index.html'
 
-    # def get_queryset(self, *args, **kwargs):
-    #     queryset = super().get_queryset(*args, **kwargs)
-    #     queryset = queryset.filter(publ_on_off=True)
-    #     return queryset
+
+def mailing(request):
+    return render(request, 'main/mailing.html')
+
+
+def mailinglogs(request):
+    return render(request, 'main/mailinglogs.html')
+
+
+def message(request):
+    return render(request, 'main/message.html')
+
+
+def client(request):
+    return render(request, 'main/client.html')
+
+
+
