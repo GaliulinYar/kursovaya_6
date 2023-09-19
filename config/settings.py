@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     'main',
     'users',
+    'blog',
 ]
 
 MIDDLEWARE = [
@@ -140,8 +141,12 @@ AUTH_USER_MODEL = 'users.User'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
+
+LOGIN_URL = '/users/'
+
 EMAIL_HOST = 'smtp.yandex.ru'
 EMAIL_PORT = 465
 EMAIL_HOST_USER = "testdomsaitov123@yandex.ru"
 EMAIL_HOST_PASSWORD = 'cjiuuitudkuqhzot'
 EMAIL_USE_SSL = True
+

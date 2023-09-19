@@ -9,7 +9,7 @@
             </div>
         </div>
     </div>
-
+{% if user.is_authenticated %}
  <div class="card-body">
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
@@ -25,5 +25,5 @@
     </form>
 </div>
 
-
+{% endif %}
 {% endblock %}

@@ -1,4 +1,7 @@
+from django.conf import settings
 from django.db import models
+
+NULLABLE = {'blank': True, 'null': True}
 
 
 class Client(models.Model):
@@ -38,6 +41,9 @@ class Mailing(models.Model):
     name_mailing = models.CharField(max_length=10, verbose_name='Название рассылки')
     theme_mess = models.CharField(max_length=200, verbose_name='Тема письма')
     body_mess = models.TextField(verbose_name='Тело письма')
+
+    # Зависимость от владельца продукта
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, verbose_name='владелец', **NULLABLE)
 
     client = models.ManyToManyField(Client)
 

@@ -8,9 +8,6 @@
                 <div class="card-body" >
     {% if user.is_authenticated %}
         <a href="/create_client" class="btn btn-primary col-12 row text-center">Добавить клиента для рассылки</a>
-    {% else %}
-        <h6>Зарегестрируйтесь или войдите, чтобы клиента для рассылки</h6>
-    {% endif %}
 
                 </div>
             </div>
@@ -42,4 +39,7 @@
 
 {% endfor %}
 
+{% else %}
+        <h6>Зарегестрируйтесь или войдите, чтобы управлять клиентами для рассылки</h6>
+{% endif %}
 {% endblock %}
