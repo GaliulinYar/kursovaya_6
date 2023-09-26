@@ -13,23 +13,14 @@ class MailingListView(ListView):
     template_name = 'main/index.html'
     context_object_name = 'object'
 
-    # def get_queryset(self):
-    #     return Mailing.objects.all()
-    # def get_queryset(self):
-    #     """Выводим информацию согласно правам доступа"""
-    #
-    #     user = self.request.user
-    #
-    #     return Mailing.objects.filter(owner=user)
     def get_queryset(self, *args, **kwargs):
-        queryset = super().get_queryset(*args, **kwargs)
-
-        try:
-            queryset = queryset.filter(owner=self.request.user)
-
-        except TypeError:
-            queryset = queryset.all().order_by('-pk')[:5]  # выводит последние 5 товаров
-
+        user = self.request.user
+        if user.groups.filter(name='manager').exists() or user.is_superuser:
+            queryset = super().get_queryset()
+        else:
+            queryset = super().get_queryset().filter(
+                mailing_owner=user.pk
+            )
         return queryset
 
 
@@ -57,7 +48,7 @@ class MailingDeleteView(DeleteView, LoginRequiredMixin):
 class MailingUpdateView(UpdateView, LoginRequiredMixin):
     """Класс для изменения рассылки"""
     model = Mailing
-    fields = ('name_mailing', 'theme_mess', 'body_mess', 'frequency', 'send_time')
+    fields = ('status', 'name_mailing', 'theme_mess', 'body_mess', 'frequency', 'send_time', 'client')
     success_url = reverse_lazy('index')
 
     def form_valid(self, form):
