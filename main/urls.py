@@ -1,13 +1,16 @@
 from django.contrib.auth.views import LoginView
 from django.urls import path, include
+from django.views.decorators.cache import cache_page
+
 from . import views
+from .models import Mailing
 from .views import MailingListView, MailingLog, MailingCreateView, MailingDeleteView, \
     MailingUpdateView, ClientListView, ClientDeleteView, ClientUpdateView, ClientCreateView, MailingLogListView
 
 # from main.views import
 
 urlpatterns = [
-    path('', MailingListView.as_view(), name='index'),
+    path('', cache_page(60)(MailingListView.as_view()), name='index'),
     path('mailinglogs/', MailingLogListView.as_view(), name='логи'),
 
     path('create/', MailingCreateView.as_view(), name='create_mailing'),
