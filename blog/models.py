@@ -8,7 +8,7 @@ class Blog(models.Model):
     image_post = models.ImageField(upload_to='preview', verbose_name='Изображение', null=True, blank=True)
     data_post = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     # признак публикации,
-    publ_on_off = models. BooleanField(default=True, verbose_name='Опубликовано')
+    publ_on_off = models.BooleanField(default=True, verbose_name='Опубликовано')
     # количество просмотров.
     views_count = models.IntegerField(default=0, verbose_name='Количество просмотров')
     slug = models.CharField(max_length=50, verbose_name='slug', null=True, blank=True)

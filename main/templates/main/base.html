@@ -108,7 +108,9 @@
           <li><a href="/" class="nav-link px-2 text-white">Главная</a></li>
           <li><a href="/client/" class="nav-link px-2 text-white">Клиенты</a></li>
           <li><a href="/blog/" class="nav-link px-2 text-white">Блог</a></li>
+            {% if user.is_authenticated %}
           <li><a href="/mailinglogs/" class="nav-link px-2 text-secondary">Логи</a></li>
+            {% endif %}
         </ul>
 
         <div class="text-end">
