@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'django_crontab',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -150,3 +151,6 @@ EMAIL_HOST_USER = "testdomsaitov123@yandex.ru"
 EMAIL_HOST_PASSWORD = 'cjiuuitudkuqhzot'
 EMAIL_USE_SSL = True
 
+CRONJOBS = [
+    ('*/2 * * * *', 'main.send_mailing.sender_mail')
+]
