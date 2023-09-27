@@ -1,72 +1,69 @@
-import os
-import django
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
-django.setup()
 import smtplib
+from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import datetime
-from smtplib import SMTPException
-from main.models import Mailing, MailingLog
+
 import pytz
-from decouple import config
+
+from main.models import Mailing, MailingLog
+
+SENDER_EMAIL = "testdomsaitov123@yandex.ru"
+PASSWORD = "cjiuuitudkuqhzot"
 
 
-def send_mails():
+def sender_mail():
     now = datetime.datetime.now()
-    for mailing in Mailing.objects.filter(mailing_status=Mailing.STATUS_STARTED):
-        for mailing_client in mailing.mailing_clients.all():
-            mailing_log = MailingLog.objects.filter(log_client=mailing_client, log_mailing=mailing)
+    for mailing in Mailing.objects.filter(status=Mailing.STATUS_STARTED):
+        for client in mailing.client.all():
+            mailing_log = MailingLog.objects.filter(log_client=client, log_mailing=mailing)
             if mailing_log.exists():
                 last_try = mailing_log.order_by('-created_time').first()
                 desired_timezone = pytz.timezone('Europe/Moscow')
                 last_try_date = last_try.created_time.astimezone(desired_timezone)
                 if mailing.PERIOD_DAILY:
                     if (now.date() - last_try_date.date()).days >= 1:
-                        send_email(mailing, mailing_client)
+                        sent_mail(mailing, client)
                 elif mailing.PERIOD_WEEKLY:
                     if (now.date() - last_try_date.date()).days >= 7:
-                        send_email(mailing, mailing_client)
+                        sent_mail(mailing, client)
                 elif mailing.PERIOD_MONTHLY:
                     if (now.date() - last_try_date.date()).days >= 30:
-                        send_email(mailing, mailing_client)
+                        sent_mail(mailing, client)
             else:
-                send_email(mailing, mailing_client)
+                sent_mail(mailing, client)
 
 
-def send_email(mailing, mailing_client):
-    """Функция по отправке сообщений пользователю"""
-    file_content = mailing.body
+def sent_mail(mailing, client):
+    """Отправка писем"""
+    date_time_now = datetime.datetime.now()
+    email = client.mail_client
+    msg = MIMEMultipart()
+    msg['From'] = SENDER_EMAIL
+    msg['Subject'] = mailing.theme_mess
+    msg.attach(MIMEText(mailing.body_mess, 'plain'))
 
-    msg = MIMEText(file_content)
-    msg['Subject'] = mailing.subject
-    msg['From'] = config('EMAIL_HOST_USER')
-    msg['To'] = mailing_client.email
-
-    smtp_server = config('EMAIL_HOST')
-    smtp_port = config('EMAIL_PORT')
-    smtp_username = config('EMAIL_HOST_USER')
-    smtp_password = config('EMAIL_HOST_PASSWORD')
-
-    s = smtplib.SMTP_SSL(smtp_server, smtp_port)
-    s.login(smtp_username, smtp_password)
     try:
-        s.sendmail('polinaskypro@yandex.ru', [mailing_client.email], msg.as_string())
-        s.quit()
+        # Заполнение письма
+        with smtplib.SMTP_SSL('smtp.yandex.ru', 465) as server:
+            server.login(SENDER_EMAIL, PASSWORD)
+            msg['To'] = email  # почта на которую отправляем
+            server.sendmail(SENDER_EMAIL, email, msg.as_string())  # подключаемся к сервреу
+
+            # записываем логи рассылки
+            MailingLog.objects.create(
+                created_time=date_time_now,
+                log_status=MailingLog.STATUS_OK,
+                log_client=client,
+                log_mailing=mailing,
+                response='доставлено',
+            )
+
+        # Обработка ошибкаи
+    except Exception as e:  # обработка ошибки
         MailingLog.objects.create(
-            log_status=MailingLog.STATUS_OK,
-            log_client=mailing_client,
-            log_mailing=mailing,
-            response='отправлено'
-        )
-    except SMTPException as e:
-        MailingLog.objects.create(
+            created_time=date_time_now,
             log_status=MailingLog.STATUS_FAILED,
-            log_client=mailing_client,
+            log_client=client,
             log_mailing=mailing,
-            response=e
+            response=f'Error {e}',
         )
-
-
-if __name__ == '__main__':
-    send_mails()
