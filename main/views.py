@@ -1,8 +1,12 @@
+from random import sample
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from pytils.translit import slugify
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, DeleteView, UpdateView
+
+from blog.models import Blog
 from main.models import Client, Mailing, MailingLog
 
 
@@ -23,6 +27,29 @@ class MailingListView(ListView):
             )
 
         return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        mailing_count = Mailing.objects.count()
+        context['mailing_count'] = mailing_count
+
+        active_mailings = Mailing.objects.filter(status='created').count()
+        context['active_mailings'] = active_mailings
+
+        unique_clients = Client.objects.count()
+        context['unique_clients'] = unique_clients
+
+        blogs = Blog.objects.filter(publ_on_off=True)
+        all_post = list(blogs)
+        if len(all_post) >= 3:
+            blog_list = sample(list(blogs), 3)
+            context['blog_list'] = blog_list
+
+        else:
+            blog_list = all_post
+            context['blog_list'] = blog_list
+
+        return context
 
 
 class MailingCreateView(CreateView, LoginRequiredMixin):
@@ -129,13 +156,12 @@ class MailingLogListView(ListView):
     template_name = 'main/mailinglogs.html'
     context_object_name = 'object'
 
-    def get_queryset(self, *args, **kwargs):
+    def get_queryset(self):
         user = self.request.user
-        if user.groups.filter(name='manager').exists() or user.is_superuser:
+        if user.is_superuser:
             queryset = super().get_queryset()
         else:
             queryset = super().get_queryset().filter(
-                owner=user.pk
+                log_mailing=user.pk
             )
-
         return queryset

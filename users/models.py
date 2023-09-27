@@ -13,6 +13,9 @@ class User(AbstractUser):
     name_client = models.CharField(max_length=20, verbose_name='Имя клиента')
     first_name_client = models.CharField(max_length=20, verbose_name='Фамилия клиента', null=True, blank=True)
 
+    user_active = models.BooleanField(default=False, verbose_name='Авторизация')
+    key_active = models.CharField(max_length=6, default=None, verbose_name='код авторизации', null=True, blank=True)
+
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 

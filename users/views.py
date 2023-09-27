@@ -5,6 +5,8 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView
 import random
+
+from main.models import Client
 from users.forms import UserRegisterForm, UserProfileForm
 from users.models import User
 
@@ -18,9 +20,16 @@ class RegisterView(CreateView):
 
     def form_valid(self, form):
         new_user = form.save()
+        activ_pass = ''.join(str(random.randint(0, 9)) for _ in range(6))
+
+        # Запишите сгенерированный код в поле key_active модели User
+        new_user.key_active = activ_pass
+        new_user.save()
+
         send_mail(
             subject='Вы зарегестрировались на сервисе',
-            message='Нужно срочно пройти авторизацию',
+            message=f'Нужно срочно пройти авторизацию Ваш код {activ_pass}'
+                    f'\nВаш код {activ_pass}, введите в личном кабинете',
             from_email=settings.EMAIL_HOST_USER,
             recipient_list=[new_user.email]
         )
@@ -35,6 +44,37 @@ class ProfileView(UpdateView, LoginRequiredMixin):
     def get_object(self, queryset=None):
         return self.request.user
 
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        kod_active_true = request.POST.get('kod_active')
+        print(kod_active_true)
+        print(request.user.key_active)
+        if request.user.key_active == kod_active_true:
+            # Если введенный код совпадает с key_active пользователя,
+            # активируем пользователя
+            request.user.user_active = True
+            request.user.save()
+
+            return redirect('users:profile')
+
+        else:
+            return redirect('users:profile')
+
+
+    # def kod_active(request):
+    #     if request.method == 'POST':
+    #         kod_active_true = request.POST.get('kod_active')
+    #         print(kod_active_true)
+    #
+    #         if request.user.key_active == kod_active_true:
+    #             # Если введенный код совпадает с key_active пользователя,
+    #             # активируем пользователя и удаляем код
+    #             request.user.user_active = True
+    #             request.user.key_active = None  # Опционально, чтобы удалить код после активации
+    #             request.user.save()
+    #
+    #             return redirect('users:login')
+
 
 def generate_new_password(request):
     new_password = ''.join(str(random.randint(0, 9)) for _ in range(6))
@@ -47,3 +87,18 @@ def generate_new_password(request):
     request.user.set_password(new_password)
     request.user.save()
     return redirect(reverse_lazy('users:login'))
+
+
+# def kod_active(request):
+#     if request.method == 'POST':
+#         kod_active_true = request.POST.get('kod_active')
+#         print(kod_active_true)
+#
+#         if request.user.key_active == kod_active_true:
+#             # Если введенный код совпадает с key_active пользователя,
+#             # активируем пользователя и удаляем код
+#             request.user.user_active = True
+#             request.user.key_active = None  # Опционально, чтобы удалить код после активации
+#             request.user.save()
+#
+#             return redirect('users:login')

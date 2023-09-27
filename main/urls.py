@@ -4,13 +4,13 @@ from django.views.decorators.cache import cache_page
 
 from . import views
 from .models import Mailing
-from .views import MailingListView, MailingLog, MailingCreateView, MailingDeleteView, \
+from .views import MailingListView, MailingCreateView, MailingDeleteView, \
     MailingUpdateView, ClientListView, ClientDeleteView, ClientUpdateView, ClientCreateView, MailingLogListView
 
 # from main.views import
 
 urlpatterns = [
-    path('', cache_page(60)(MailingListView.as_view()), name='index'),
+    path('', MailingListView.as_view(), name='index'),
     path('mailinglogs/', MailingLogListView.as_view(), name='логи'),
 
     path('create/', MailingCreateView.as_view(), name='create_mailing'),
