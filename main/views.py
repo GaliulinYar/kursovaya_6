@@ -19,8 +19,9 @@ class MailingListView(ListView):
             queryset = super().get_queryset()
         else:
             queryset = super().get_queryset().filter(
-                mailing_owner=user.pk
+                owner=user.pk
             )
+
         return queryset
 
 
@@ -68,10 +69,30 @@ class ClientListView(ListView, LoginRequiredMixin):
     model = Client
     template_name = 'main/client.html'
 
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            queryset = super().get_queryset()
+        else:
+            queryset = super().get_queryset().filter(
+                client_owner=user.pk
+            )
+        return queryset
+
 
 class ClientDeleteView(DeleteView, LoginRequiredMixin):
     model = Client
     success_url = reverse_lazy('client')
+
+    def get_queryset(self, *args, **kwargs):
+        user = self.request.user
+        if user.groups.filter(name='manager').exists() or user.is_superuser:
+            queryset = super().get_queryset()
+        else:
+            queryset = super().get_queryset().filter(
+                mailing_owner=user.pk
+            )
+        return queryset
 
 
 class ClientUpdateView(UpdateView, LoginRequiredMixin):
