@@ -1,8 +1,15 @@
-package = []
+[[package]]
+name = "pytils"
+version = "0.4.1"
+description = "Russian-specific string utils"
+category = "main"
+optional = false
+python-versions = "^3.7"
 
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.11"
-content-hash = "220d9413a8d732dbc14bff21ff9eb129dbf0aad27adbb7a09fa2fcaee414aa56"
+content-hash = "9827b2a0bcc10e81f634d80cd2a9b22bf6be918b1bcc118f256fca5cbd02ab98"
 
 [metadata.files]
+pytils = []

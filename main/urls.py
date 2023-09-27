@@ -1,12 +1,21 @@
-from django.urls import path
+from django.contrib.auth.views import LoginView
+from django.urls import path, include
 from . import views
-from .views import ClientListView
+from .views import MailingListView, mailinglogs, MailingCreateView, MailingDeleteView, \
+    MailingUpdateView, ClientListView, ClientDeleteView, ClientUpdateView, ClientCreateView
 
 # from main.views import
 
 urlpatterns = [
-    path('', ClientListView.as_view(),  name='index'),
-    # path('contacts/', contacts),
-    # path('product/<int:pk>/', ProductDetailView.as_view(), name='product'),
-    # path('great_prod/', great_prod)
+    path('', MailingListView.as_view(), name='index'),
+    path('mailinglogs/', mailinglogs),
+
+    path('create/', MailingCreateView.as_view(), name='create_mailing'),
+    path('update/<int:pk>', MailingUpdateView.as_view(), name='update_mailing'),
+    path('delete/<int:pk>/', MailingDeleteView.as_view(), name='delete'),
+
+    path('create_client/', ClientCreateView.as_view(), name='create_client'),
+    path('client_update/<int:pk>', ClientUpdateView.as_view(), name='update_client'),
+    path('client_delete/<int:pk>/', ClientDeleteView.as_view(), name='delete_client'),
+    path('client/', ClientListView.as_view(), name='client')
 ]
