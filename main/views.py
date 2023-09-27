@@ -3,7 +3,7 @@ from django.shortcuts import render
 from pytils.translit import slugify
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, DeleteView, UpdateView
-from main.models import Client, Mailing
+from main.models import Client, Mailing, MailingLog
 
 
 # Create your views here.
@@ -61,11 +61,8 @@ class MailingUpdateView(UpdateView, LoginRequiredMixin):
         return super().form_valid(form)
 
 
-def mailinglogs(request):
-    return render(request, 'main/mailinglogs.html')
-
-
 class ClientListView(ListView, LoginRequiredMixin):
+    """Вывод всех клиентов на странице"""
     model = Client
     template_name = 'main/client.html'
 
@@ -81,6 +78,7 @@ class ClientListView(ListView, LoginRequiredMixin):
 
 
 class ClientDeleteView(DeleteView, LoginRequiredMixin):
+    """Класс удаления клиентов для рассылок"""
     model = Client
     success_url = reverse_lazy('client')
 
@@ -96,6 +94,7 @@ class ClientDeleteView(DeleteView, LoginRequiredMixin):
 
 
 class ClientUpdateView(UpdateView, LoginRequiredMixin):
+    """Класс изменения клиентов для рассылок"""
     model = Client
     fields = ('mail_client', 'name_client', 'first_name_client', 'last_name_client')
     success_url = reverse_lazy('client')
@@ -110,6 +109,7 @@ class ClientUpdateView(UpdateView, LoginRequiredMixin):
 
 
 class ClientCreateView(CreateView, LoginRequiredMixin):
+    """Класс создания клиентов для рассылок"""
     model = Client
     fields = ('mail_client', 'name_client', 'first_name_client', 'last_name_client')
     success_url = reverse_lazy('client')
@@ -121,3 +121,21 @@ class ClientCreateView(CreateView, LoginRequiredMixin):
             new_mat.save()
 
         return super().form_valid(form)
+
+
+class MailingLogListView(ListView):
+    """Показывает все логи"""
+    model = MailingLog
+    template_name = 'main/mailinglogs.html'
+    context_object_name = 'object'
+
+    def get_queryset(self, *args, **kwargs):
+        user = self.request.user
+        if user.groups.filter(name='manager').exists() or user.is_superuser:
+            queryset = super().get_queryset()
+        else:
+            queryset = super().get_queryset().filter(
+                owner=user.pk
+            )
+
+        return queryset
